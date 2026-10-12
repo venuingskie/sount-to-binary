@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound-to-Binary Converter</title>
+<style>
+  body { background:#f4f6fb; color:#222; font-family:Arial, sans-serif; margin:0; padding:20px; line-height:1.5; }
+  .wrap { max-width:900px; margin:auto; }
+  h1 { color:#2b3a67; border-bottom:3px solid #2b3a67; padding-bottom:6px; }
+  h2 { color:#2b3a67; margin-top:30px; }
+  .card { background:#fff; border:1px solid #ccd3e6; border-radius:8px; padding:14px; margin-bottom:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:14px; }
+  .field { flex:1; min-width:180px; }
+  label { display:block; font-weight:bold; margin-bottom:4px; }
+  input[type=text], textarea { width:100%; box-sizing:border-box; padding:7px; border:1px solid #aab4d0; border-radius:5px; font-size:15px; font-family:inherit; }
+  textarea { min-height:80px; }
+  button { background:#2b3a67; color:#fff; border:none; padding:9px 18px; border-radius:5px; font-size:15px; cursor:pointer; margin:10px 8px 0 0; }
+  button:hover { background:#44579a; }
+  #playBtn { background:#e07a2f; }
+  small { color:#666; }
+  #warning { display:none; background:#fde8e8; color:#b00020; border:1px solid #b00020; padding:9px; border-radius:5px; margin-top:12px; }
+  canvas { width:100%; height:auto; background:#fafbff; border:1px solid #ccd3e6; border-radius:6px; margin-top:12px; }
+  .facts span { display:inline-block; background:#e3ecff; border-radius:14px; padding:4px 12px; margin:0 8px 8px 0; }
+  table { border-collapse:collapse; width:100%; background:#fff; }
+  th, td { border:1px solid #ccd3e6; padding:6px; text-align:center; }
+  th { background:#2b3a67; color:#fff; }
+  td input { width:80px; text-align:center; }
+  .scroll { overflow-x:auto; }
+  #binaryLine { font-family:Consolas, monospace; background:#fff3e0; border:1px solid #e0b070; padding:10px; border-radius:5px; word-break:break-all; }
+  .q { font-weight:bold; margin:14px 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Sound-to-Binary Converter</h1>
+ 
+  <div class="card row">
+    <div class="field"><label for="name">Your name</label><input type="text" id="name" placeholder="e.g. Juan Dela Cruz"></div>
+    <div class="field"><label for="section">Course / Section</label><input type="text" id="section" placeholder="e.g. BSCS-3A"></div>
+  </div>
+ 
+  <div class="card">
+    <div class="row">
+      <div class="field"><label for="freq">Frequency (Hz)</label><input type="text" id="freq" value="1000"></div>
+      <div class="field"><label for="amp">Amplitude (0 to 1)</label><input type="text" id="amp" value="1"></div>
+      <div class="field"><label for="samples">Number of samples (2 to 64)</label><input type="text" id="samples" value="4"></div>
+      <div class="field"><label for="bits">Bits per sample (1 to 8)</label><input type="text" id="bits" value="2"></div>
+    </div>
+    <button id="convertBtn">Convert</button>
+    <button id="playBtn">▶ Play sound</button>
+    <small>Turn your volume down first</small>
+    <div id="warning"></div>
+    <canvas id="wave" width="800" height="200"></canvas>
+  </div>
+ 
+  <div id="results">
+    <h2>Wave Facts</h2>
+    <div class="facts">
+      <span>Amplitude: <b id="rAmp"></b></span>
+      <span>Frequency: <b id="rFreq"></b></span>
+      <span>Period: <b id="rPeriod"></b></span>
+      <span>Wavelength: <b id="rWave"></b></span>
+    </div>
+ 
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Sample #</th><th>Time (ms)</th><th>Amplitude</th><th>Level</th><th>Binary</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+ 
+    <h2>Binary result</h2>
+    <div id="binaryLine"></div>
+    <p><b>Total bits:</b> <span id="totalBits"></span></p>
+  </div>
+ 
+  <h2>Test Results</h2>
+  <p>These values are calculated by the app above.</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Test</th><th>Frequency</th><th>Amplitude</th><th>Samples</th><th>Bits</th><th>Period</th><th>Wavelength</th><th>Total bits</th><th>Binary result</th></tr></thead>
+      <tbody>
+        <tr class="test"><td>A</td><td><input type="text" value="440"></td><td><input type="text" value="0.8"></td><td><input type="text" value="8"></td><td><input type="text" value="3"></td><td class="o"></td><td class="o"></td><td class="o"></td><td class="o"></td></tr>
+        <tr class="test"><td>B</td><td><input type="text" value="200"></td><td><input type="text" value="0.5"></td><td><input type="text" value="6"></td><td><input type="text" value="4"></td><td class="o"></td><td class="o"></td><td class="o"></td><td class="o"></td></tr>
+        <tr class="test"><td>C</td><td><input type="text" value="500"></td><td><input type="text" value="0.9"></td><td><input type="text" value="5"></td><td><input type="text" value="3"></td><td class="o"></td><td class="o"></td><td class="o"></td><td class="o"></td></tr>
+      </tbody>
+    </table>
+  </div>
+ 
+  <h2>Explain It</h2>
+  <p><small>Draft answers are filled in. Read them, make sure you understand each one, and edit the wording so it matches how you would explain it.</small></p>
+ 
+  <div class="q">1. In your own words, how does your app change a sound wave into binary? Name the three steps.</div>
+  <textarea id="a1">My app turns a sound wave into binary in three steps. First, it samples the wave by measuring its height at evenly spaced points; second, it quantizes each height by rounding it to the nearest level; third, it encodes each level as a binary number that has exactly the chosen number of bits.</textarea>
+ 
+  <div class="q">2. Run Test A again with 2 bits, then 6 bits. Which gives more detail about the wave, and why?</div>
+  <textarea id="a2">6 bits gives more detail about the wave. With 2 bits there are only 4 levels, so Test A's 8 samples collapse into levels like 2, 2, 3, 2, 2, 1, 0, 1, but with 6 bits there are 64 levels and the samples get distinct levels like 32, 49, 57, 49, 32, 14, 6, 14, so the shape of the wave is kept much more closely (at the cost of more total bits: 48 instead of 16).</textarea>
+ 
+  <div class="q">3. Which test has the longest wavelength? How is wavelength connected to frequency?</div>
+  <textarea id="a3">Test B has the longest wavelength, 1.72 m, compared with 78.0 cm for Test A and 68.6 cm for Test C. Wavelength and frequency are inversely related because wavelength equals 343 divided by the frequency, so Test B, which has the lowest frequency (200 Hz), has the longest wavelength.</textarea>
+ 
+  <div class="q">4. What was the hardest stage to build, and how did you fix it?</div>
+  <textarea id="a4">The hardest stage was Stage 4 (binary), because each binary value had to have exactly the right number of digits, such as 00 instead of 0 when bits is 2. I fixed it by adding leading zeros with padStart, then checking my output against the Check Your Work First table until it matched.</textarea>
+ 
+  <div class="card" style="margin-top:20px;">
+    <b>Done typing?</b> Press the button to download your finished page. Upload that downloaded <code>index.html</code> to GitHub, because only the downloaded copy keeps your name and answers.
+    <br><button id="downloadBtn">Download my finished page</button>
+  </div>
+</div>
+ 
+<script>
+  // ---------- Core math ----------
+  function compute(freq, amp, n, bits) {
+    var periodMs = (1 / freq) * 1000;
+    var wavelengthM = 343 / freq;
+    var levels = Math.pow(2, bits);
+    var rows = [], bins = [];
+    for (var i = 0; i < n; i++) {
+      var time = i * periodMs / n;
+      var height = amp * Math.sin(2 * Math.PI * i / n);
+      var level = Math.floor(((height + 1) / 2) * (levels - 1) + 0.5 + 1e-9); // round half up
+      var bin = level.toString(2).padStart(bits, "0");
+      rows.push({ num: i + 1, time: time, height: height, level: level, bin: bin });
+      bins.push(bin);
+    }
+    return { periodMs: periodMs, wavelengthM: wavelengthM, rows: rows, binary: bins.join(" "), totalBits: n * bits };
+  }
+  function fmt2(x) { var s = x.toFixed(2); return Number(s) === 0 ? "0.00" : s; }
+  function fmtWave(m) { return m >= 1 ? m.toFixed(2) + " m" : (m * 100).toFixed(1) + " cm"; }
+  function toNum(s) { s = String(s).trim(); return s === "" ? NaN : Number(s); }
+ 
+  function validate(f, a, n, b) {
+    var m = [];
+    if (isNaN(f) || f <= 0) m.push("Frequency must be greater than 0.");
+    if (isNaN(a) || a < 0 || a > 1) m.push("Amplitude must be from 0 to 1.");
+    if (isNaN(n) || !Number.isInteger(n) || n < 2 || n > 64) m.push("Samples must be a whole number from 2 to 64.");
+    if (isNaN(b) || !Number.isInteger(b) || b < 1 || b > 8) m.push("Bits must be a whole number from 1 to 8.");
+    return m;
+  }
+ 
+  // ---------- Wave drawing ----------
+  function drawWave(amp, n) {
+    var c = document.getElementById("wave"), g = c.getContext("2d");
+    var W = c.width, H = c.height, mid = H / 2, scale = H * 0.4;
+    g.clearRect(0, 0, W, H);
+    g.strokeStyle = "#ccd3e6"; g.beginPath(); g.moveTo(0, mid); g.lineTo(W, mid); g.stroke();
+    g.strokeStyle = "#2b3a67"; g.lineWidth = 3; g.beginPath();
+    for (var x = 0; x <= W; x++) {
+      var y = mid - amp * scale * Math.sin(2 * Math.PI * x / W);
+      if (x === 0) g.moveTo(x, y); else g.lineTo(x, y);
+    }
+    g.stroke(); g.lineWidth = 1;
+    for (var i = 0; i < n; i++) {
+      var px = (i / n) * W, py = mid - amp * scale * Math.sin(2 * Math.PI * i / n);
+      g.strokeStyle = "#e07a2f"; g.beginPath(); g.moveTo(px, mid); g.lineTo(px, py); g.stroke();
+      g.fillStyle = "#2b3a67"; g.beginPath(); g.arc(px, py, 5, 0, 2 * Math.PI); g.fill();
+    }
+  }
+ 
+  // ---------- Convert ----------
+  function convert() {
+    var fS = document.getElementById("freq").value, aS = document.getElementById("amp").value;
+    var f = toNum(fS), a = toNum(aS);
+    var n = toNum(document.getElementById("samples").value);
+    var b = toNum(document.getElementById("bits").value);
+    var warn = document.getElementById("warning"), res = document.getElementById("results");
+    var msgs = validate(f, a, n, b);
+    if (msgs.length) {
+      warn.innerHTML = "⚠ " + msgs.join("<br>⚠ ");
+      warn.style.display = "block"; res.style.display = "none";
+      return;
+    }
+    warn.style.display = "none"; res.style.display = "block";
+    var r = compute(f, a, n, b);
+    document.getElementById("rAmp").textContent = aS.trim();
+    document.getElementById("rFreq").textContent = fS.trim() + " Hz";
+    document.getElementById("rPeriod").textContent = r.periodMs.toFixed(2) + " ms";
+    document.getElementById("rWave").textContent = fmtWave(r.wavelengthM);
+    var tb = document.getElementById("tbody"); tb.innerHTML = "";
+    r.rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      [row.num, fmt2(row.time), fmt2(row.height), row.level, row.bin].forEach(function (v) {
+        var td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    document.getElementById("binaryLine").textContent = r.binary;
+    document.getElementById("totalBits").textContent = r.totalBits;
+    drawWave(a, n);
+  }
+  document.getElementById("convertBtn").addEventListener("click", convert);
+ 
+  // ---------- Play (bonus) ----------
+  document.getElementById("playBtn").addEventListener("click", function () {
+    var f = toNum(document.getElementById("freq").value);
+    if (isNaN(f) || f <= 0 || f > 20000) {
+      var w = document.getElementById("warning");
+      w.innerHTML = "⚠ Enter a frequency from 1 to 20000 Hz to play the tone.";
+      w.style.display = "block"; return;
+    }
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    var ctx = new Ctx(), osc = ctx.createOscillator(), gain = ctx.createGain();
+    gain.gain.value = 0.1; osc.frequency.value = f;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 1);
+  });
+ 
+  // ---------- Test Results (uses the same compute()) ----------
+  function updateTests() {
+    document.querySelectorAll("tr.test").forEach(function (tr) {
+      var inp = tr.querySelectorAll("input"), out = tr.querySelectorAll(".o");
+      var f = toNum(inp[0].value), a = toNum(inp[1].value), n = toNum(inp[2].value), b = toNum(inp[3].value);
+      if (validate(f, a, n, b).length) {
+        out.forEach(function (td) { td.textContent = "Invalid"; });
+        return;
+      }
+      var r = compute(f, a, n, b);
+      out[0].textContent = r.periodMs.toFixed(2) + " ms";
+      out[1].textContent = fmtWave(r.wavelengthM);
+      out[2].textContent = r.totalBits;
+      out[3].textContent = r.binary;
+    });
+  }
+  document.querySelectorAll("tr.test input").forEach(function (i) { i.addEventListener("input", updateTests); });
+ 
+  // ---------- Download finished page ----------
+  document.getElementById("downloadBtn").addEventListener("click", function () {
+    var clone = document.documentElement.cloneNode(true);
+    clone.querySelectorAll("input").forEach(function (i, k) {
+      i.setAttribute("value", document.querySelectorAll("input")[k].value);
+    });
+    clone.querySelectorAll("textarea").forEach(function (t, k) {
+      t.textContent = document.querySelectorAll("textarea")[k].value;
+    });
+    var html = "<!DOCTYPE html>\n" + clone.outerHTML;
+    var blob = new Blob([html], { type: "text/html" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "index.html";
+    a.click();
+  });
+ 
+  // ---------- Start ----------
+  convert();
+  updateTests();
+</script>
+</body>
+</html>
+ 
